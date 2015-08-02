@@ -2,7 +2,7 @@
 ################################
 # Author: Rum Coke
 # Data  : 2015/07/30
-# Ver   : 1.0.0
+# Ver   : 1.1.0
 ################################
 # Crolling at Twitter.
 function TwCroller()
@@ -54,10 +54,10 @@ function TwCroller()
 		if [ ${#IDs[*]} -ne 0 ]
 		then 
 			# Execute Add Favorite.
-			test 1 -eq ${FLAG_FAV} && AddFavorite
+			test 1 -eq ${FLAG_FAV} && echo ${IDs[@]} | sed 's/ /\n/g' | xargs -P${MAX_P} -n1 -I % bash -c "AddFavorite %"
 
 			# Execute Do ReTweet.
-			test 1 -eq ${FLAG_RT} && Retweet
+			test 1 -eq ${FLAG_RT} && echo ${IDs[@]} | sed 's/ /\n/g' | xargs -P${MAX_P} -n1 -I % bash -c "Retweet %"
 		fi
         done
 }
@@ -65,18 +65,21 @@ function TwCroller()
 # Add Favorite.
 function AddFavorite()
 {
-	for (( X = 0; X < ${#IDs[@]}; ++X ))
-	do
-		tw --fav=${IDs[$X]} --yes
-	done
+	tw --fav=${1} --yes > /dev/null 2>&1
 }
 
 # Do Retweet.
 function Retweet()
 {
+	tw --rt=${1} --yes > /dev/null 2>&1
+}
+
+# Do Reply.
+function RePly()
+{
 	for (( X = 0; X < ${#IDs[@]}; ++X ))
 	do
-		tw --rt=${IDs[$X]} --yes
+		echo "OK"
 	done
 }
 
@@ -90,8 +93,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # Twitter Account and Keyword.
 # Usage: Account,Keyword1,Keyword2..,Keyword n
 Account=(
- "@AccountName1,Keyword1,Keyword2"
- "@AccountName2,Keyword1,Keyword2"
+ "@hogehoge,Linux,Mac,Windows"
 )
 
 # Fav Flag.
@@ -102,7 +104,10 @@ FLAG_FAV=1
 # RT Flag.
 # ON :1
 # OFF:0
-FLAG_RT=1
+FLAG_RT=0
+
+# Max Parallel Process.
+MAX_P=8
 
 ##### User Config #####
 
@@ -111,6 +116,12 @@ KEY_WORD=''
 
 # Tweet IDs.
 IDs=()
+
+# Export Data.
+export PATH FLAG_FAV FLAG_RT Account KEY_WORD IDs MAX_P
+
+# Export Function.
+export -f TwCroller AddFavorite Retweet RePly
 
 # Twitter Reading.
 TwCroller
