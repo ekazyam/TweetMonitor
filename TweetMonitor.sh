@@ -1,8 +1,8 @@
 #!/bin/bash
 ################################
 # Author: Rum Coke
-# Data  : 2015/07/30
-# Ver   : 1.1.0
+# Data  : 2015/08/02
+# Ver   : 1.2.0
 ################################
 # Crolling at Twitter.
 function TwCroller()
@@ -58,6 +58,9 @@ function TwCroller()
 
 			# Execute Do ReTweet.
 			test 1 -eq ${FLAG_RT} && echo ${IDs[@]} | sed 's/ /\n/g' | xargs -P${MAX_P} -n1 -I % bash -c "Retweet %"
+
+			# Execute Do RePly.
+			test 1 -eq ${FLAG_RP} && echo ${IDs[@]} | sed 's/ /\n/g' | xargs -P${MAX_P} -n1 -I % bash -c "RePly %"
 		fi
         done
 }
@@ -77,10 +80,7 @@ function Retweet()
 # Do Reply.
 function RePly()
 {
-	for (( X = 0; X < ${#IDs[@]}; ++X ))
-	do
-		echo "OK"
-	done
+	tw "${RT_WORD}" --id={1} --yes > /dev/null 2>&1
 }
 
 ##################
@@ -106,6 +106,11 @@ FLAG_FAV=1
 # OFF:0
 FLAG_RT=0
 
+# RP Flag.
+# ON :1
+# OFF:0
+FLAG_RP=0
+
 # Max Parallel Process.
 MAX_P=8
 
@@ -117,8 +122,11 @@ KEY_WORD=''
 # Tweet IDs.
 IDs=()
 
+# Rt word.
+RT_WORD="I think so too."
+
 # Export Data.
-export PATH FLAG_FAV FLAG_RT Account KEY_WORD IDs MAX_P
+export PATH FLAG_FAV FLAG_RT FLAG_RP Account KEY_WORD IDs RT_WORD MAX_P
 
 # Export Function.
 export -f TwCroller AddFavorite Retweet RePly
